@@ -78,7 +78,8 @@
         <!-- 6. sor - Datagrid -->
         <Label x:Name="lbFileName" Content=" " VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="5" HorizontalAlignment="Left"/>
         <Label x:Name="lbNoteCounter" Content=" " VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" HorizontalAlignment="Center"/>
-        <Label x:Name="lbAverage" Content=" " VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" HorizontalAlignment="Right"/>
+        
+        <Label x:Name="lbAverage" Content=" " VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" HorizontalAlignment="Right" ContentStringFormat="{}{0:#,0.0}" />
 
 
         <!-- 7. sor - Datagrid -->

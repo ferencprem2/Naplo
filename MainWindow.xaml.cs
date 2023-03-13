@@ -24,12 +24,12 @@ namespace WpfOsztalyzas
     /// </summary>
     public partial class MainWindow : Window
     {
-        string fajlNev;
+        string fileName;
         string activeFileName;
         string numberOfNotes;
         double average;
         //Így minden metódus fogja tudni használni.
-        ObservableCollection<Osztalyzat> jegyek = new();
+        ObservableCollection<Grading> grades = new();
         OpenFileDialog openDialog = new();
         SaveFileDialog saveDialog = new();
 
@@ -45,27 +45,27 @@ namespace WpfOsztalyzas
             {
 
 
-                jegyek.Clear();
+                grades.Clear();
                 StreamReader sr = new StreamReader(openDialog.FileName);
                 while (!sr.EndOfStream)
                 {
                     string[] mezok = sr.ReadLine().Split(";");
-                    Osztalyzat ujJegy = new Osztalyzat(mezok[0], mezok[1], mezok[2], int.Parse(mezok[3]));
-                    jegyek.Add(ujJegy);
+                    Grading ujJegy = new Grading(mezok[0], mezok[1], mezok[2], int.Parse(mezok[3]));
+                    grades.Add(ujJegy);
 
                     average += double.Parse(mezok[3]);
                     
 
                 }
                 sr.Close(); 
-                dgJegyek.ItemsSource = jegyek;
+                dgJegyek.ItemsSource = grades;
 
                 lbFileName.Content = $"A fájl neve: {activeFileName}";
 
-                numberOfNotes = jegyek.Count.ToString();
+                numberOfNotes = grades.Count.ToString();
 
-                lbNoteCounter.Content = $"A jegyek száma: {numberOfNotes}";
-                lbAverage.Content = $"A jegyek átlaga: {average / Convert.ToDouble(numberOfNotes)}";
+                lbNoteCounter.Content = $"Jegyek száma: {numberOfNotes}";
+                lbAverage.Content = $"Átlaga: {(average / Convert.ToDouble(numberOfNotes)).ToString("N2")}";
             }
 
 
@@ -79,27 +79,35 @@ namespace WpfOsztalyzas
 
         private void btnRogzit_Click(object sender, RoutedEventArgs e)
         {
-            fajlNev = openDialog.FileName;
+            fileName = openDialog.FileName;
             //TODO JAVÍTANI
             if (txtNev.Text.Length >= 7 && txtNev.Text.Contains(" ") && datDatum.SelectedDate <= DateTime.Now)
             {
                 string csvSor = $"{txtNev.Text};{datDatum.Text};{cboTantargy.Text};{sliJegy.Value}";
                 //Megnyitás hozzáfűzéses írása (APPEND)
-                StreamWriter sw = new StreamWriter(fajlNev, append: true);
+                StreamWriter sw = new StreamWriter(fileName, append: true);
                 sw.WriteLine(csvSor);
                 sw.Close();
 
-                Osztalyzat currentNote = new Osztalyzat(txtNev.Text, datDatum.Text, cboTantargy.Text, Convert.ToInt32(sliJegy.Value));
-                jegyek.Add(currentNote);
-                dgJegyek.ItemsSource = jegyek;
+                Grading currentNote = new Grading(txtNev.Text, datDatum.Text, cboTantargy.Text, Convert.ToInt32(sliJegy.Value));
+                grades.Add(currentNote);
+                dgJegyek.ItemsSource = grades;
 
                 lbFileName.Content = $"A fájl neve: {activeFileName}";
 
-                numberOfNotes = jegyek.Count.ToString();
+                numberOfNotes = grades.Count.ToString();
 
-                lbNoteCounter.Content = $"A jegyek száma: {numberOfNotes}";
-                lbAverage.Content = $"A jegyek átlaga: {average / Convert.ToDouble(numberOfNotes)}";
+                lbNoteCounter.Content = $"Jegyek száma: {numberOfNotes}";
+                lbAverage.Content = $"Átlaga: {(average / Convert.ToDouble(numberOfNotes)).ToString("N2")}";
 
+            }
+            else if (datDatum.SelectedDate > DateTime.Now)
+            {
+                MessageBox.Show("Nem lehet jövőbeli dátum!");
+            }
+            else
+            {
+                MessageBox.Show("Helyes nevet adjon meg!");
             }
         }
 
@@ -120,33 +128,32 @@ namespace WpfOsztalyzas
 
         private void btnBetolt_Click(object sender, RoutedEventArgs e)
         {
+            activeFileName = openDialog.SafeFileName;
+            if (openDialog.ShowDialog() == true)
+            {
 
-            fajlNev = openDialog.FileName;
-            if (openDialog.ShowDialog() == true) 
-            { 
-            
-                jegyek.Clear();  //A lista előző tartalmát töröljük
-                StreamReader sr = new StreamReader(fajlNev); //olvasásra nyitja az állományt
-                while (!sr.EndOfStream) //amíg nem ér a fájl végére
+
+                grades.Clear();
+                StreamReader sr = new StreamReader(openDialog.FileName);
+                while (!sr.EndOfStream)
                 {
-                    string[] mezok = sr.ReadLine().Split(";"); //A beolvasott sort feltördeli mezőkre
-                                                               //A mezők értékeit felhasználva létrehoz egy objektumot
-                    Osztalyzat ujJegy = new Osztalyzat(mezok[0], mezok[1], mezok[2], int.Parse(mezok[3]));
-                    jegyek.Add(ujJegy); //Az objektumot a lista végére helyezi
-                }
-                sr.Close(); //állomány lezárása
+                    string[] mezok = sr.ReadLine().Split(";");
+                    Grading ujJegy = new Grading(mezok[0], mezok[1], mezok[2], int.Parse(mezok[3]));
+                    grades.Add(ujJegy);
 
-                //A Datagrid adatforrása a jegyek nevű lista lesz.
-                //A lista objektumokat tartalmaz. Az objektumok lesznek a rács sorai.
-                //Az objektum nyilvános tulajdonságai kerülnek be az oszlopokba.
-                dgJegyek.ItemsSource = jegyek;
+                    average += double.Parse(mezok[3]);
+
+
+                }
+                sr.Close();
+                dgJegyek.ItemsSource = grades;
 
                 lbFileName.Content = $"A fájl neve: {activeFileName}";
 
-                numberOfNotes = jegyek.Count.ToString();
+                numberOfNotes = grades.Count.ToString();
 
-                lbNoteCounter.Content = $"A jegyek száma: {numberOfNotes}";
-                lbAverage.Content = $"A jegyek átlaga: {average / Convert.ToDouble(numberOfNotes)}";
+                lbNoteCounter.Content = $"Jegyek száma: {numberOfNotes}";
+                lbAverage.Content = $"Átlaga: {(average / Convert.ToDouble(numberOfNotes)).ToString("N2")}";
             }
         }
 
